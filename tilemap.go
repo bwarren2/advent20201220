@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"sort"
 	"strconv"
 )
 
@@ -117,5 +118,7 @@ func (tm TileMap) Corners() (result []int) {
 			result = append(result, tile)
 		}
 	}
-	return
+	sort.Ints(result)
+	fmt.Println(result)
+	return result
 }

@@ -13,6 +13,58 @@ type Puzzle struct {
 	EdgeNeighbors map[Edge][]int
 }
 
+func (p Puzzle) SolutionBoundaries() (minRowIdx int, maxRowIdx int, minColIdx int, maxColIdx int) {
+	for idx := range p.Solution {
+		minRowIdx = idx.rowIdx
+		maxRowIdx = idx.rowIdx
+		minColIdx = idx.colIdx
+		maxColIdx = idx.colIdx
+		break
+	}
+
+	for idx := range p.Solution {
+		minRowIdx = int(math.Min(float64(idx.rowIdx), float64(minRowIdx)))
+		maxRowIdx = int(math.Max(float64(idx.rowIdx), float64(maxRowIdx)))
+		minColIdx = int(math.Min(float64(idx.colIdx), float64(minColIdx)))
+		maxColIdx = int(math.Max(float64(idx.colIdx), float64(maxColIdx)))
+	}
+	return minRowIdx, maxRowIdx, minColIdx, maxColIdx
+}
+
+func (p Puzzle) RawPrint() string {
+	minRowIdx, maxRowIdx, minColIdx, maxColIdx := p.SolutionBoundaries()
+	repr := ""
+	for row := minRowIdx; row <= maxRowIdx; row++ {
+		for i := 0; i < 10; i++ {
+			for col := minColIdx; col <= maxColIdx; col++ {
+				for j := 0; j < 10; j++ {
+					repr += fmt.Sprint(p.Solution[Index{rowIdx: row, colIdx: col}][Index{rowIdx: i, colIdx: j}])
+				}
+				repr += fmt.Sprint(" ")
+			}
+			repr += fmt.Sprintln()
+		}
+		repr += fmt.Sprintln()
+	}
+	return repr
+}
+
+func (p Puzzle) BorderlessPrint() string {
+	minRowIdx, maxRowIdx, minColIdx, maxColIdx := p.SolutionBoundaries()
+	repr := ""
+	for row := minRowIdx; row <= maxRowIdx; row++ {
+		for i := 1; i < 9; i++ {
+			for col := minColIdx; col <= maxColIdx; col++ {
+				for j := 1; j < 9; j++ {
+					repr += fmt.Sprint(p.Solution[Index{rowIdx: row, colIdx: col}][Index{rowIdx: i, colIdx: j}])
+				}
+			}
+			repr += fmt.Sprintln()
+		}
+	}
+	return repr
+}
+
 func NewPuzzle(tiles TileMap) Puzzle {
 	return Puzzle{
 		Tiles:     tiles,
@@ -66,7 +118,8 @@ func (p Puzzle) DownRightOriented(t Tile) Tile {
 
 func (p *Puzzle) MatchLeft(rowID, colID int) bool {
 	targetSide := p.Solution[Index{rowIdx: rowID, colIdx: colID - 1}].Right()
-	for ID, tile := range p.Tiles {
+	for _, ID := range p.EdgeNeighborList()[targetSide.AsCanonical()] {
+		tile := p.Tiles[ID]
 		if p.HasUsed(ID) {
 			continue
 		}

@@ -82,8 +82,15 @@ func TestBuild(t *testing.T) {
 	tiles := advent.TilesFromFile("input.txt")
 	puzzle := advent.NewPuzzle(tiles)
 	puzzle.Build()
-	// 	fmt.Println(puzzle.Solution)
-	// 	t.Fail()
+	fmt.Println(puzzle.RawPrint())
+	t.Fail()
+}
+func TestBorderlessPrint(t *testing.T) {
+	tiles := advent.TilesFromFile("input.txt")
+	puzzle := advent.NewPuzzle(tiles)
+	puzzle.Build()
+	fmt.Println(puzzle.BorderlessPrint())
+	t.Fail()
 }
 
 // func TestPart2(t *testing.T) {
