@@ -119,6 +119,5 @@ func (tm TileMap) Corners() (result []int) {
 		}
 	}
 	sort.Ints(result)
-	fmt.Println(result)
 	return result
 }

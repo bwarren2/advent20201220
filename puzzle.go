@@ -3,6 +3,7 @@ package advent20201220
 import (
 	"fmt"
 	"math"
+	"strconv"
 )
 
 type Puzzle struct {
@@ -65,6 +66,24 @@ func (p Puzzle) BorderlessPrint() string {
 	return repr
 }
 
+func (p Puzzle) ReconstructedImage() Tile {
+	tile := make(Tile)
+	var rowIdx, colIdx int
+	for _, rn := range p.BorderlessPrint() {
+		if rn == '\n' {
+			rowIdx++
+			colIdx = 0
+		} else {
+
+			digit, err := strconv.ParseInt(string(rn), 10, 64)
+			check(err)
+			tile[Index{rowIdx: rowIdx, colIdx: colIdx}] = int(digit)
+			colIdx++
+		}
+	}
+	return tile
+}
+
 func NewPuzzle(tiles TileMap) Puzzle {
 	return Puzzle{
 		Tiles:     tiles,
@@ -85,12 +104,11 @@ func (p *Puzzle) Build() {
 				p.Solution[Index{rowIdx: rowID, colIdx: colID}] = tile
 			} else if colID == 0 {
 				if !p.MatchUpwards(rowID, colID) {
-					panic("WTH?")
+					panic("Hunh?")
 				}
 			} else {
 				if !p.MatchLeft(rowID, colID) {
-					fmt.Println(rowID, colID)
-					panic("WTF?")
+					panic("What?")
 				}
 			}
 		}

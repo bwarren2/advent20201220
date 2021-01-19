@@ -35,7 +35,7 @@ func (t Tile) ToString() string {
 	repr := ""
 	for row := minRowIdx; row <= maxRowIdx; row++ {
 		for col := minColIdx; col <= maxColIdx; col++ {
-			repr += fmt.Sprint(t[Index{col, row}], " ")
+			repr += fmt.Sprint(t[Index{colIdx: col, rowIdx: row}])
 		}
 		repr += fmt.Sprintln()
 	}
@@ -93,9 +93,10 @@ func (t Tile) CanonicalEdges() []Edge {
 
 func (t Tile) Rotate90() Tile {
 	newTile := make(Tile)
-	for col := 0; col < 10; col++ {
-		for row := 9; row >= 0; row-- {
-			newTile[Index{colIdx: 9 - row, rowIdx: col}] = t[Index{rowIdx: row, colIdx: col}]
+	minRowIdx, maxRowIdx, minColIdx, maxColIdx := t.Boundaries()
+	for col := minColIdx; col <= maxColIdx; col++ {
+		for row := minRowIdx; row <= maxRowIdx; row++ {
+			newTile[Index{colIdx: maxColIdx - row, rowIdx: col}] = t[Index{rowIdx: row, colIdx: col}]
 		}
 	}
 	return newTile
@@ -103,10 +104,68 @@ func (t Tile) Rotate90() Tile {
 
 func (t Tile) Flip() Tile {
 	newTile := make(Tile)
-	for row := 0; row < 10; row++ {
-		for col := 0; col < 10; col++ {
+	minRowIdx, maxRowIdx, minColIdx, maxColIdx := t.Boundaries()
+	for row := minRowIdx; row <= maxRowIdx; row++ {
+		for col := minColIdx; col <= maxColIdx; col++ {
 			newTile[Index{colIdx: row, rowIdx: col}] = t[Index{rowIdx: row, colIdx: col}]
 		}
 	}
 	return newTile
+}
+
+// SeaMonsterMask gets which indices are part of a sea monster, and returns a boolean for if it found any.
+func (t Tile) SeaMonsterMask() (bool, map[Index]int) {
+	seaMonsterMask := make(map[Index]int)
+	minRowIdx, maxRowIdx, minColIdx, maxColIdx := t.Boundaries()
+	hasSeaMonsters := false
+	for row := minRowIdx; row <= maxRowIdx; row++ {
+		for col := minColIdx; col <= maxColIdx; col++ {
+
+			if (t[Index{rowIdx: row, colIdx: col}] == 1 &&
+				t[Index{rowIdx: row + 1, colIdx: col + 1}] == 1 &&
+				t[Index{rowIdx: row + 1, colIdx: col + 4}] == 1 &&
+				t[Index{rowIdx: row + 0, colIdx: col + 5}] == 1 &&
+				t[Index{rowIdx: row + 0, colIdx: col + 6}] == 1 &&
+				t[Index{rowIdx: row + 1, colIdx: col + 7}] == 1 &&
+				t[Index{rowIdx: row + 1, colIdx: col + 10}] == 1 &&
+				t[Index{rowIdx: row + 0, colIdx: col + 11}] == 1 &&
+				t[Index{rowIdx: row + 0, colIdx: col + 12}] == 1 &&
+				t[Index{rowIdx: row + 1, colIdx: col + 13}] == 1 &&
+				t[Index{rowIdx: row + 1, colIdx: col + 16}] == 1 &&
+				t[Index{rowIdx: row + 0, colIdx: col + 17}] == 1 &&
+				t[Index{rowIdx: row + 0, colIdx: col + 18}] == 1 &&
+				t[Index{rowIdx: row + 0, colIdx: col + 19}] == 1 &&
+				t[Index{rowIdx: row - 1, colIdx: col + 18}] == 1) {
+				hasSeaMonsters = true
+				seaMonsterMask[Index{rowIdx: row, colIdx: col}] = 1
+				seaMonsterMask[Index{rowIdx: row + 1, colIdx: col + 1}] = 1
+				seaMonsterMask[Index{rowIdx: row + 1, colIdx: col + 4}] = 1
+				seaMonsterMask[Index{rowIdx: row + 0, colIdx: col + 5}] = 1
+				seaMonsterMask[Index{rowIdx: row + 0, colIdx: col + 6}] = 1
+				seaMonsterMask[Index{rowIdx: row + 1, colIdx: col + 7}] = 1
+				seaMonsterMask[Index{rowIdx: row + 1, colIdx: col + 10}] = 1
+				seaMonsterMask[Index{rowIdx: row + 0, colIdx: col + 11}] = 1
+				seaMonsterMask[Index{rowIdx: row + 0, colIdx: col + 12}] = 1
+				seaMonsterMask[Index{rowIdx: row + 1, colIdx: col + 13}] = 1
+				seaMonsterMask[Index{rowIdx: row + 1, colIdx: col + 16}] = 1
+				seaMonsterMask[Index{rowIdx: row + 0, colIdx: col + 17}] = 1
+				seaMonsterMask[Index{rowIdx: row + 0, colIdx: col + 18}] = 1
+				seaMonsterMask[Index{rowIdx: row + 0, colIdx: col + 19}] = 1
+				seaMonsterMask[Index{rowIdx: row - 1, colIdx: col + 18}] = 1
+			}
+		}
+	}
+	return hasSeaMonsters, seaMonsterMask
+}
+
+func (t Tile) WaterRoughness(mask Tile) (total int) {
+	minRowIdx, maxRowIdx, minColIdx, maxColIdx := t.Boundaries()
+	for row := minRowIdx; row <= maxRowIdx; row++ {
+		for col := minColIdx; col <= maxColIdx; col++ {
+			if mask[Index{rowIdx: row, colIdx: col}] == 0 {
+				total += t[Index{rowIdx: row, colIdx: col}]
+			}
+		}
+	}
+	return
 }

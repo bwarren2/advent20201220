@@ -36,7 +36,7 @@ func TestDifficultEdgeMatches(t *testing.T) {
 	tiles := advent.TilesFromFile("sample.txt")
 	tiles.DifficultEdgeMatches()
 	// advent.DifficultEdgeMatches("input.txt")
-	t.Fail()
+	// t.Fail()
 }
 
 func TestPart1(t *testing.T) {
@@ -68,8 +68,9 @@ func TestFlip(t *testing.T) {
 	flip := tile.Flip()
 	fmt.Println(flip.ToString())
 	dup := flip.Flip()
-	fmt.Println(dup.ToString())
-	// t.Fail()
+	if dup.ToString() != tile.ToString() || flip.ToString() == tile.ToString() {
+		t.Fail()
+	}
 }
 
 // func TestDownRight(t *testing.T) {
@@ -83,13 +84,55 @@ func TestBuild(t *testing.T) {
 	puzzle := advent.NewPuzzle(tiles)
 	puzzle.Build()
 	fmt.Println(puzzle.RawPrint())
-	t.Fail()
+	// t.Fail()
 }
+
 func TestBorderlessPrint(t *testing.T) {
 	tiles := advent.TilesFromFile("input.txt")
 	puzzle := advent.NewPuzzle(tiles)
 	puzzle.Build()
-	fmt.Println(puzzle.BorderlessPrint())
+	if puzzle.BorderlessPrint() == puzzle.ReconstructedImage().ToString() {
+		t.Skip()
+	}
+	t.Fail()
+}
+
+func TestAnswer(t *testing.T) {
+	tiles := advent.TilesFromFile("input.txt")
+	puzzle := advent.NewPuzzle(tiles)
+	puzzle.Build()
+	image := puzzle.ReconstructedImage()
+	// fmt.Println(puzzle.RawPrint())
+	for i := 0; i < 9; i++ {
+		// fmt.Println(image.ToString())
+		if i == 4 {
+			image = image.Flip()
+		}
+		hasMonsters, mask := image.SeaMonsterMask()
+
+		if hasMonsters {
+			if image.WaterRoughness(mask) == 1537 {
+				t.Skip()
+			}
+		}
+		image = image.Rotate90()
+	}
+	t.Fail()
+}
+
+func TestHasMonsters(t *testing.T) {
+	tile := advent.TilesFromFile("sample_monster.txt")[1111]
+	image := tile
+	for i := 0; i < 9; i++ {
+		if i == 4 {
+			image = image.Flip()
+		}
+		hasMonsters, _ := image.SeaMonsterMask()
+		if hasMonsters {
+			t.Skip()
+		}
+		image = image.Rotate90()
+	}
 	t.Fail()
 }
 
